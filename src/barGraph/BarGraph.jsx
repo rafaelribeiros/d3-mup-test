@@ -30,7 +30,9 @@ export function BarGraph() {
   const handleChange = event => {
     const value = event.target.value;
     setSeedValue(value);
-    updateData();
+    if (value) {
+      updateData();
+    }
   };
 
   const getXAxis = values => {
