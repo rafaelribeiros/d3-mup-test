@@ -2,19 +2,22 @@ import React, { useRef, useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
-import Container from "@material-ui/core/Container";
+import CardContent from "@material-ui/core/CardContent";
+import Card from "@material-ui/core/Card";
+import Grid from "@material-ui/core/Grid";
 import * as d3 from "d3";
 
 import { generateRandomNumbers } from "../const/functions";
 import { DATA } from "../const/data";
 
 const useStyles = makeStyles(theme => ({
-  root: {
-    flexGrow: 1
+  card: {
+    padding: theme.spacing(1),
+    margin: theme.spacing(1)
   },
-  container: {
-    padding: theme.spacing(2),
-    margin: theme.spacing(4)
+  inputContainer: {
+    paddingBottom: theme.spacing(3),
+    paddingLeft: theme.spacing(2)
   }
 }));
 
@@ -29,8 +32,9 @@ export function BarGraph() {
 
   const handleChange = event => {
     const value = event.target.value;
-    setSeedValue(value);
-    if (value) {
+    const isInRange = value >= 0 && value <= 10;
+    if (isInRange) setSeedValue(value);
+    if (value && isInRange) {
       updateData(value);
     }
   };
@@ -48,6 +52,7 @@ export function BarGraph() {
   const renderXAxis = (xAxis, svg) => {
     svg
       .append("g")
+      .attr("class", "xAxis")
       .attr("transform", `translate(0,${height})`)
       .call(xAxis);
   };
@@ -71,6 +76,7 @@ export function BarGraph() {
   const renderYAxis = (yAxis, svg) => {
     svg
       .append("g")
+      .attr("class", "yAxis")
       .attr("transform", `translate(${marginLeft},0)`)
       .call(yAxis);
   };
@@ -97,9 +103,6 @@ export function BarGraph() {
       .attr("y", (d, i) => {
         return height - Math.max(0, yScale(d.value));
       });
-    // .attr("x", (d, i) => {
-    //   return marginLeft + i * 40;
-    // });
   };
 
   useEffect(() => {
@@ -156,23 +159,30 @@ export function BarGraph() {
   }, []);
 
   return (
-    <div className={classes.root}>
-      <Container maxWidth="md">
-        <div className={classes.container}>
-          <Typography variant="h6" gutterBottom>
-            Please, choose a number between 0 and 10
-          </Typography>
-          <TextField
-            onChange={handleChange}
-            value={seedValue}
-            id="standard-basic"
-            label="Seed"
-            type="number"
-            InputProps={{ inputProps: { min: 0, max: 10 } }}
-          />
-        </div>
-        <svg ref={ref} />
-      </Container>
-    </div>
+    <Grid container justify="center" alignItems="center" spacing={3}>
+      <Grid item>
+        <Card className={classes.card}>
+          <CardContent>
+            <div className={classes.inputContainer}>
+              <Typography variant="h6" gutterBottom>
+                Please, kindly choose a number between 0 and 10
+              </Typography>
+              <TextField
+                variant="outlined"
+                onChange={handleChange}
+                value={seedValue}
+                id="seed"
+                label="Seed"
+                type="number"
+                InputProps={{ inputProps: { min: 0, max: 10 } }}
+                // error
+                // helperText="Incorrect entry."
+              />
+            </div>
+            <svg ref={ref} />
+          </CardContent>
+        </Card>
+      </Grid>
+    </Grid>
   );
 }
