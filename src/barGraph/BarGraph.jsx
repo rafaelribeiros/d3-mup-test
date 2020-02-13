@@ -21,8 +21,7 @@ const useStyles = makeStyles(theme => ({
     margin: theme.spacing(2)
   },
   inputContainer: {
-    paddingBottom: theme.spacing(3),
-    paddingLeft: theme.spacing(2)
+    paddingBottom: theme.spacing(3)
   }
 }));
 
@@ -77,8 +76,7 @@ export function BarGraph() {
       })
       .attr("y", () => {
         return height;
-      })
-      .attr("height", 0);
+      });
 
     renderXAxis(xAxis, svgElement);
     renderYAxis(yAxis, svgElement);
@@ -128,6 +126,7 @@ export function BarGraph() {
         d3.max(values.map(d => d.value))
       ])
       .range([height - yScale(d3.min(values.map(d => d.value))), 0]);
+
     return { yAxis: d3.axisLeft(yAxisScale), yScale };
   };
 
