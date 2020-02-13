@@ -31,15 +31,15 @@ export function BarGraph() {
   const [seedValue, setSeedValue] = useState(5);
   const [range] = useState({ min: -10, max: 90 });
   const [marginLeft] = useState(30);
-  const [items] = useState(DATA);
   const [height] = useState(500);
-  const [width] = useState(items.length * 40);
+  const [width] = useState(DATA.length * 40);
   const ref = useRef();
 
   const handleChange = event => {
     const value = event.target.value;
 
     const inRange = value >= 0 && value <= 10;
+
     if (!value || inRange) setSeedValue(value);
 
     if (value && inRange) {
@@ -70,7 +70,7 @@ export function BarGraph() {
       .data(charts)
       .enter()
       .append("rect")
-      // This part was based on example (bandwidth)
+      // This part was based on the example (bandwidth)
       .attr("width", xScale.bandwidth())
       .attr("x", function(d) {
         return xScale(d.title);
@@ -89,7 +89,7 @@ export function BarGraph() {
       .attr("height", d => {
         return Math.abs(yScale(d.value));
       })
-      .attr("y", (d, i) => {
+      .attr("y", d => {
         return height - Math.max(0, yScale(d.value));
       });
 
@@ -98,10 +98,11 @@ export function BarGraph() {
 
   const getXAxis = values => {
     const xScale = d3
+      // This part was based on the example (scaleBand)
       .scaleBand()
       .domain(values.map(d => d.title))
       .range([marginLeft, width])
-      .padding(0.1);
+      .padding(0.2);
 
     return { xAxis: d3.axisBottom(xScale).tickSize(0), xScale };
   };
