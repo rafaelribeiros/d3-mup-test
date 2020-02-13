@@ -1,6 +1,7 @@
 {
   "name": "d3-app-test",
   "version": "0.1.0",
+  "author": "Rafael R Santos",
   "private": true,
   "dependencies": {
     "@material-ui/core": "^4.9.2",
