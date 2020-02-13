@@ -11,9 +11,14 @@ import { generateRandomNumbers } from "../const/functions";
 import { DATA } from "../const/data";
 
 const useStyles = makeStyles(theme => ({
+  root: {
+    display: "flex",
+    flexWrap: "wrap",
+    justifyContent: "center"
+  },
   card: {
     padding: theme.spacing(1),
-    margin: theme.spacing(1)
+    margin: theme.spacing(2)
   },
   inputContainer: {
     paddingBottom: theme.spacing(3),
@@ -24,26 +29,78 @@ const useStyles = makeStyles(theme => ({
 export function BarGraph() {
   const classes = useStyles();
   const [seedValue, setSeedValue] = useState(5);
-  const [marginLeft] = useState(50);
+  const [range] = useState({ min: -10, max: 90 });
+  const [marginLeft] = useState(30);
   const [items] = useState(DATA);
   const [height] = useState(500);
-  const [width] = useState(items.length * 40 + 10);
+  const [width] = useState(items.length * 40);
   const ref = useRef();
 
   const handleChange = event => {
     const value = event.target.value;
-    const isInRange = value >= 0 && value <= 10;
-    if (isInRange) setSeedValue(value);
-    if (value && isInRange) {
-      updateData(value);
+
+    const inRange = value >= 0 && value <= 10;
+    if (!value || inRange) setSeedValue(value);
+
+    if (value && inRange) {
+      updateData(parseInt(value));
     }
   };
+
+  useEffect(() => {
+    const charts = [
+      ...DATA.map((item, index) => {
+        const chart = Object.assign({}, item);
+        chart.value = generateRandomNumbers(range, seedValue, index);
+        return chart;
+      })
+    ];
+
+    const svgElement = d3
+      .select(ref.current)
+      .attr("viewBox", `0 0 ${width} ${height + 60}`);
+
+    const { xAxis, xScale } = getXAxis(charts);
+    const { yAxis, yScale } = getYAxis(charts);
+
+    const rects = svgElement
+      .append("g")
+      .attr("fill", "teal")
+      .selectAll("rect")
+      .data(charts)
+      .enter()
+      .append("rect")
+      // This part was based on example (bandwidth)
+      .attr("width", xScale.bandwidth())
+      .attr("x", function(d) {
+        return xScale(d.title);
+      })
+      .attr("y", () => {
+        return height;
+      })
+      .attr("height", 0);
+
+    renderXAxis(xAxis, svgElement);
+    renderYAxis(yAxis, svgElement);
+
+    rects
+      .transition()
+      .duration(1000)
+      .attr("height", d => {
+        return Math.abs(yScale(d.value));
+      })
+      .attr("y", (d, i) => {
+        return height - Math.max(0, yScale(d.value));
+      });
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const getXAxis = values => {
     const xScale = d3
       .scaleBand()
       .domain(values.map(d => d.title))
-      .range([marginLeft, width - 0])
+      .range([marginLeft, width])
       .padding(0.1);
 
     return { xAxis: d3.axisBottom(xScale).tickSize(0), xScale };
@@ -83,9 +140,9 @@ export function BarGraph() {
 
   const updateData = seed => {
     const charts = [
-      ...DATA.map(item => {
+      ...DATA.map((item, index) => {
         const chart = Object.assign({}, item);
-        chart.value = generateRandomNumbers(90, -11, seed);
+        chart.value = generateRandomNumbers(range, seed, index);
         return chart;
       })
     ];
@@ -100,72 +157,19 @@ export function BarGraph() {
       .attr("height", d => {
         return Math.abs(yScale(d.value));
       })
-      .attr("y", (d, i) => {
+      .attr("y", d => {
         return height - Math.max(0, yScale(d.value));
       });
   };
 
-  useEffect(() => {
-    const charts = [
-      ...DATA.map(item => {
-        const chart = Object.assign({}, item);
-        chart.value = generateRandomNumbers(90, -11, seedValue);
-        return chart;
-      })
-    ];
-
-    const svgElement = d3
-      .select(ref.current)
-      .attr("class", "axis")
-      .attr("width", width)
-      .attr("height", height + 100);
-
-    const { xAxis, xScale } = getXAxis(charts);
-    const { yAxis, yScale } = getYAxis(charts);
-
-    const rects = svgElement
-      .append("g")
-      .attr("fill", "teal")
-      .selectAll("rect")
-      .data(charts)
-      .enter()
-      .append("rect")
-      .attr("width", xScale.bandwidth())
-      .attr("x", function(d) {
-        return xScale(d.title);
-      })
-      .attr("y", d => {
-        return height;
-      })
-      .attr("height", 0);
-
-    renderXAxis(xAxis, svgElement);
-    renderYAxis(yAxis, svgElement);
-
-    rects
-      .transition()
-      .duration(1000)
-      .attr("height", d => {
-        return Math.abs(yScale(d.value));
-      })
-      .attr("y", (d, i) => {
-        return height - Math.max(0, yScale(d.value));
-      })
-      .attr("x", (d, i) => {
-        return marginLeft + i * 40;
-      });
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   return (
-    <Grid container justify="center" alignItems="center" spacing={3}>
-      <Grid item>
+    <div className={classes.root}>
+      <Grid item xs={12} sm={10} md={10} lg={8}>
         <Card className={classes.card}>
           <CardContent>
             <div className={classes.inputContainer}>
               <Typography variant="h6" gutterBottom>
-                Please, kindly choose a number between 0 and 10
+                Please, kindly enter a number between 0 and 10
               </Typography>
               <TextField
                 variant="outlined"
@@ -174,15 +178,13 @@ export function BarGraph() {
                 id="seed"
                 label="Seed"
                 type="number"
-                InputProps={{ inputProps: { min: 0, max: 10 } }}
-                // error
-                // helperText="Incorrect entry."
+                margin="dense"
               />
             </div>
             <svg ref={ref} />
           </CardContent>
         </Card>
       </Grid>
-    </Grid>
+    </div>
   );
 }

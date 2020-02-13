@@ -12,10 +12,6 @@ export const DATA = [
     value: 0
   },
   {
-    title: "C",
-    value: 0
-  },
-  {
     title: "D",
     value: 0
   },
