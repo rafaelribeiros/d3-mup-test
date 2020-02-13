@@ -42,7 +42,7 @@ export function BarGraph() {
     if (!value || inRange) setSeedValue(value);
 
     if (value && inRange) {
-      updateData(parseInt(value));
+      updateBars(parseInt(value));
     }
   };
 
@@ -138,7 +138,7 @@ export function BarGraph() {
       .call(yAxis);
   };
 
-  const updateData = seed => {
+  const updateBars = seed => {
     const charts = [
       ...DATA.map((item, index) => {
         const chart = Object.assign({}, item);
